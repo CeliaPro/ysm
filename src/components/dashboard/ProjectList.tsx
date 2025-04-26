@@ -1,31 +1,30 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { FolderIcon, PlusIcon } from 'lucide-react';
-import { Project } from '@/types/project';
-import ProjectCard from './ProjectCard';
+import React from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { FolderIcon, PlusIcon } from 'lucide-react'
+import { Project } from '@/types/project'
+import ProjectCard from './ProjectCard'
 
 interface ProjectListProps {
-  projects: Project[];
-  searchQuery: string;
-  showArchived: boolean;
-  canManageProjects: boolean;
-  onNewProject: () => void;
-  onEditProject: (project: Project) => void;
-  onArchiveProject: (project: Project) => void;
-  onDeleteProject: (project: Project) => void;
+  projects: Project[]
+  searchQuery: string
+  showArchived: boolean
+  canManageProjects: boolean
+  onNewProject: () => void
+  onEditProject: (project: Project) => void
+  onArchiveProject: (project: Project) => void
+  onDeleteProject: (project: Project) => void
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({
   projects,
   searchQuery,
-  showArchived, 
+  showArchived,
   canManageProjects,
   onNewProject,
   onEditProject,
   onArchiveProject,
-  onDeleteProject
+  onDeleteProject,
 }) => {
   if (projects.length === 0) {
     return (
@@ -37,8 +36,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
             {searchQuery
               ? `Aucun projet ne correspond à "${searchQuery}"`
               : showArchived
-              ? 'Aucun projet archivé trouvé'
-              : 'Commencez par créer votre premier projet'}
+                ? 'Aucun projet archivé trouvé'
+                : 'Commencez par créer votre premier projet'}
           </p>
           {canManageProjects && !searchQuery && (
             <Button onClick={onNewProject}>
@@ -48,14 +47,14 @@ const ProjectList: React.FC<ProjectListProps> = ({
           )}
         </CardContent>
       </Card>
-    );
+    )
   }
-  
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
-        <ProjectCard 
-          key={project.id} 
+        <ProjectCard
+          key={project.id}
           project={project}
           canManageProjects={canManageProjects}
           onEditProject={onEditProject}
@@ -64,7 +63,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default ProjectList;
+export default ProjectList

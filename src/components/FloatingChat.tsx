@@ -1,32 +1,28 @@
-
-import React, { useState } from 'react';
-import { MessageCircleIcon, X, MinusIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import ChatAssistant from '@/components/ChatAssistant';
-import { 
+'use client'
+import React, { useState } from 'react'
+import { MessageCircleIcon, X, MinusIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import ChatAssistant from '@/components/ChatAssistant'
+import {
   Drawer,
   DrawerContent,
   DrawerClose,
   DrawerTrigger,
-} from '@/components/ui/drawer';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+} from '@/components/ui/drawer'
+import { useMediaQuery } from '@/hooks/use-media-query'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 const FloatingChat: React.FC = () => {
-  const [open, setOpen] = useState(false);
-  const [minimized, setMinimized] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [open, setOpen] = useState(false)
+  const [minimized, setMinimized] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   if (isDesktop) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button 
-            className="rounded-full h-14 w-14 fixed bottom-6 right-6 shadow-lg" 
+          <Button
+            className="rounded-full h-14 w-14 fixed bottom-6 right-6 shadow-lg"
             size="icon"
           >
             <MessageCircleIcon className="h-6 w-6" />
@@ -37,18 +33,18 @@ const FloatingChat: React.FC = () => {
             <div className="p-3 border-b flex justify-between items-center">
               <h3 className="font-medium text-sm">Assistant IA</h3>
               <div className="flex items-center gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
                   onClick={() => setMinimized(!minimized)}
                 >
                   <MinusIcon className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
                   onClick={() => setOpen(false)}
                 >
                   <X className="h-4 w-4" />
@@ -63,14 +59,14 @@ const FloatingChat: React.FC = () => {
           </div>
         </SheetContent>
       </Sheet>
-    );
+    )
   }
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button 
-          className="rounded-full h-14 w-14 fixed bottom-6 right-6 shadow-lg" 
+        <Button
+          className="rounded-full h-14 w-14 fixed bottom-6 right-6 shadow-lg"
           size="icon"
         >
           <MessageCircleIcon className="h-6 w-6" />
@@ -81,10 +77,10 @@ const FloatingChat: React.FC = () => {
           <div className="p-3 border-b flex justify-between items-center">
             <h3 className="font-medium text-sm">Assistant IA</h3>
             <div className="flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
                 onClick={() => setMinimized(!minimized)}
               >
                 <MinusIcon className="h-4 w-4" />
@@ -104,7 +100,7 @@ const FloatingChat: React.FC = () => {
         </div>
       </DrawerContent>
     </Drawer>
-  );
-};
+  )
+}
 
-export default FloatingChat;
+export default FloatingChat

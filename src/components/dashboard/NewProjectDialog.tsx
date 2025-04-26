@@ -1,40 +1,39 @@
-
-import React, { useState } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import React, { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Project } from '@/types/project';
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { Project } from '@/types/project'
 
 interface NewProjectDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreateProject: (project: Project) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onCreateProject: (project: Project) => void
 }
 
-const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ 
-  open, 
+const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
+  open,
   onOpenChange,
-  onCreateProject
+  onCreateProject,
 }) => {
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
-  
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+
   const handleCreateProject = () => {
     if (!newProjectName.trim()) {
-      toast.error('Le nom du projet est requis');
-      return;
+      toast.error('Le nom du projet est requis')
+      return
     }
-    
+
     const newProject: Project = {
       id: `project-${Date.now()}`,
       name: newProjectName,
@@ -46,22 +45,22 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
       usagePercentage: 0,
       createdAt: new Date(),
       lastUpdated: new Date(),
-    };
-    
-    onCreateProject(newProject);
-    setNewProjectName('');
-    setNewProjectDescription('');
-    onOpenChange(false);
-    
-    toast.success(`Projet "${newProjectName}" créé avec succès`);
-  };
+    }
+
+    onCreateProject(newProject)
+    setNewProjectName('')
+    setNewProjectDescription('')
+    onOpenChange(false)
+
+    toast.success(`Projet "${newProjectName}" créé avec succès`)
+  }
 
   const handleClose = () => {
-    setNewProjectName('');
-    setNewProjectDescription('');
-    onOpenChange(false);
-  };
-  
+    setNewProjectName('')
+    setNewProjectDescription('')
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
@@ -71,7 +70,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
             Ajoutez un nouveau projet pour organiser vos documents.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="project-name">Nom du Projet</Label>
@@ -82,7 +81,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
               onChange={(e) => setNewProjectName(e.target.value)}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="project-description">Description</Label>
             <Textarea
@@ -94,7 +93,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
             />
           </div>
         </div>
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             Annuler
@@ -103,7 +102,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default NewProjectDialog;
+export default NewProjectDialog

@@ -1,38 +1,42 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import DocumentCard from '@/components/DocumentCard';
-import { Document } from '@/types/project';
-import DocumentViewer from '@/components/DocumentViewer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  SearchIcon, 
-  PlusIcon, 
-  FolderIcon, 
+'use client'
+import React, { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import Navbar from '@/components/Navbar'
+import DocumentCard from '@/components/DocumentCard'
+import { Document } from '@/types/project'
+import DocumentViewer from '@/components/DocumentViewer'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  SearchIcon,
+  PlusIcon,
   FilterIcon,
   StarIcon,
   ArchiveIcon,
   CheckIcon,
   XIcon,
-  FileIcon
-} from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { format } from 'date-fns';
-import FloatingChat from '@/components/FloatingChat';
+  FileIcon,
+} from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { toast } from 'sonner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import FloatingChat from '@/components/FloatingChat'
 
 // Mock data
 const mockDocuments: Document[] = [
@@ -57,7 +61,7 @@ const mockDocuments: Document[] = [
     contentType: 'application/pdf',
     publicUrl: null,
     accessLevel: 'project',
-    filePath: '/documents/financial-report-q4.pdf'
+    filePath: '/documents/financial-report-q4.pdf',
   },
   {
     id: '2',
@@ -77,10 +81,11 @@ const mockDocuments: Document[] = [
     s3BucketName: null,
     s3ObjectKey: null,
     s3Region: null,
-    contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    contentType:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     publicUrl: null,
     accessLevel: 'project',
-    filePath: '/documents/roadmap-2024.docx'
+    filePath: '/documents/roadmap-2024.docx',
   },
   {
     id: '3',
@@ -101,10 +106,11 @@ const mockDocuments: Document[] = [
     s3BucketName: null,
     s3ObjectKey: null,
     s3Region: null,
-    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    contentType:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     publicUrl: null,
     accessLevel: 'project',
-    filePath: '/documents/marketing-analysis.xlsx'
+    filePath: '/documents/marketing-analysis.xlsx',
   },
   {
     id: '4',
@@ -127,7 +133,7 @@ const mockDocuments: Document[] = [
     contentType: 'application/pdf',
     publicUrl: null,
     accessLevel: 'project',
-    filePath: '/documents/employee-handbook.pdf'
+    filePath: '/documents/employee-handbook.pdf',
   },
   {
     id: '5',
@@ -149,9 +155,10 @@ const mockDocuments: Document[] = [
     s3ObjectKey: 'logos/final-2023.png',
     s3Region: 'us-west-2',
     contentType: 'image/png',
-    publicUrl: 'https://company-assets.s3.us-west-2.amazonaws.com/logos/final-2023.png',
+    publicUrl:
+      'https://company-assets.s3.us-west-2.amazonaws.com/logos/final-2023.png',
     accessLevel: 'public',
-    filePath: '/documents/logo-finals.png'
+    filePath: '/documents/logo-finals.png',
   },
   {
     id: '6',
@@ -171,12 +178,13 @@ const mockDocuments: Document[] = [
     s3BucketName: null,
     s3ObjectKey: null,
     s3Region: null,
-    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    contentType:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     publicUrl: null,
     accessLevel: 'project',
-    filePath: '/documents/project-timeline.xlsx'
+    filePath: '/documents/project-timeline.xlsx',
   },
-];
+]
 
 // Mock projects for selection
 const mockProjects = [
@@ -184,121 +192,116 @@ const mockProjects = [
   { id: '2', name: 'Product Development' },
   { id: '3', name: 'Marketing' },
   { id: '4', name: 'HR Policies' },
-];
+]
 
-const DocumentsPage = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const [documents, setDocuments] = useState<Document[]>(mockDocuments);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [activeProject, setActiveProject] = useState<string>('all');
-  
+export default function DocumentsPage() {
+  const { isLoading, user } = useAuth()
+  const [documents, setDocuments] = useState<Document[]>(mockDocuments)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState('all')
+  const [activeProject, setActiveProject] = useState<string>('all')
+
   // Document viewer
-  const [viewedDocument, setViewedDocument] = useState<Document | null>(null);
-  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
-  
-  // Upload dialog
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [uploadFileName, setUploadFileName] = useState('');
-  const [uploadDescription, setUploadDescription] = useState('');
-  const [uploadProject, setUploadProject] = useState<string>('');
-  const [uploadTags, setUploadTags] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
-  // Edit document dialog
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editProject, setEditProject] = useState<string>('');
-  const [editTags, setEditTags] = useState('');
+  const [viewedDocument, setViewedDocument] = useState<Document | null>(null)
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false)
 
-  // If not authenticated, redirect to login
-  if (!isLoading && !isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  // Upload dialog
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
+  const [uploadFileName, setUploadFileName] = useState('')
+  const [uploadDescription, setUploadDescription] = useState('')
+  const [uploadProject, setUploadProject] = useState<string>('')
+  const [uploadTags, setUploadTags] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  // Edit document dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editProject, setEditProject] = useState<string>('')
+  const [editTags, setEditTags] = useState('')
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    );
+    )
   }
-  
+
   const handleViewDocument = (document: Document) => {
-    setViewedDocument(document);
-    setDocumentDialogOpen(true);
-  };
-  
+    setViewedDocument(document)
+    setDocumentDialogOpen(true)
+  }
+
   const handleToggleStar = (document: Document) => {
-    const updatedDocuments = documents.map(doc => 
-      doc.id === document.id
-        ? { ...doc, isStarred: !doc.isStarred }
-        : doc
-    );
-    
-    setDocuments(updatedDocuments);
-    toast.success(`${document.isStarred ? 'Removed from' : 'Added to'} favorites`);
-  };
-  
+    const updatedDocuments = documents.map((doc) =>
+      doc.id === document.id ? { ...doc, isStarred: !doc.isStarred } : doc
+    )
+
+    setDocuments(updatedDocuments)
+    toast.success(
+      `${document.isStarred ? 'Removed from' : 'Added to'} favorites`
+    )
+  }
+
   const handleArchiveDocument = (document: Document) => {
-    const updatedDocuments = documents.map(doc => 
-      doc.id === document.id
-        ? { ...doc, isArchived: !doc.isArchived }
-        : doc
-    );
-    
-    setDocuments(updatedDocuments);
-    toast.success(`${document.isArchived ? 'Unarchived' : 'Archived'} ${document.name}`);
-    
+    const updatedDocuments = documents.map((doc) =>
+      doc.id === document.id ? { ...doc, isArchived: !doc.isArchived } : doc
+    )
+
+    setDocuments(updatedDocuments)
+    toast.success(
+      `${document.isArchived ? 'Unarchived' : 'Archived'} ${document.name}`
+    )
+
     if (documentDialogOpen) {
-      setDocumentDialogOpen(false);
+      setDocumentDialogOpen(false)
     }
-  };
-  
+  }
+
   const handleDeleteDocument = (document: Document) => {
-    const updatedDocuments = documents.filter(doc => doc.id !== document.id);
-    setDocuments(updatedDocuments);
-    toast.success(`Deleted ${document.name}`);
-    
+    const updatedDocuments = documents.filter((doc) => doc.id !== document.id)
+    setDocuments(updatedDocuments)
+    toast.success(`Deleted ${document.name}`)
+
     if (documentDialogOpen) {
-      setDocumentDialogOpen(false);
+      setDocumentDialogOpen(false)
     }
-  };
-  
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      
+      const file = e.target.files[0]
+      setSelectedFile(file)
+
       // Auto-fill filename from the selected file
       if (!uploadFileName) {
-        setUploadFileName(file.name);
+        setUploadFileName(file.name)
       }
     }
-  };
-  
+  }
+
   const handleUploadDocument = () => {
     if (!selectedFile) {
-      toast.error('Please select a file');
-      return;
+      toast.error('Please select a file')
+      return
     }
-    
+
     if (!uploadFileName.trim()) {
-      toast.error('Please enter a file name');
-      return;
+      toast.error('Please enter a file name')
+      return
     }
-    
+
     if (!uploadProject) {
-      toast.error('Please select a project');
-      return;
+      toast.error('Please select a project')
+      return
     }
-    
+
     // Create new document
-    const fileExtension = selectedFile.name.split('.').pop() || '';
-    const selectedProjectObj = mockProjects.find(p => p.id === uploadProject);
-    
+    const fileExtension = selectedFile.name.split('.').pop() || ''
+    const selectedProjectObj = mockProjects.find((p) => p.id === uploadProject)
+
     const newDocument: Document = {
       id: `doc-${Date.now()}`,
       name: uploadFileName,
@@ -311,7 +314,10 @@ const DocumentsPage = () => {
       uploadedAt: new Date(),
       updatedAt: new Date(),
       description: uploadDescription || null,
-      tags: uploadTags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      tags: uploadTags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag),
       isArchived: false,
       storageProvider: 'local',
       s3BucketName: null,
@@ -321,38 +327,38 @@ const DocumentsPage = () => {
       publicUrl: null,
       accessLevel: 'project',
       filePath: `/documents/${uploadFileName.toLowerCase().replace(/\s+/g, '-')}`,
-      isStarred: false
-    };
-    
-    setDocuments([newDocument, ...documents]);
-    
+      isStarred: false,
+    }
+
+    setDocuments([newDocument, ...documents])
+
     // Reset form
-    setUploadFileName('');
-    setUploadDescription('');
-    setUploadProject('');
-    setUploadTags('');
-    setSelectedFile(null);
-    setIsUploadDialogOpen(false);
-    
-    toast.success(`Uploaded ${newDocument.name}`);
-  };
-  
+    setUploadFileName('')
+    setUploadDescription('')
+    setUploadProject('')
+    setUploadTags('')
+    setSelectedFile(null)
+    setIsUploadDialogOpen(false)
+
+    toast.success(`Uploaded ${newDocument.name}`)
+  }
+
   const handleEditDocument = () => {
-    if (!editingDocument) return;
-    
+    if (!editingDocument) return
+
     if (!editName.trim()) {
-      toast.error('Please enter a file name');
-      return;
+      toast.error('Please enter a file name')
+      return
     }
-    
+
     if (!editProject) {
-      toast.error('Please select a project');
-      return;
+      toast.error('Please select a project')
+      return
     }
-    
-    const selectedProjectObj = mockProjects.find(p => p.id === editProject);
-    
-    const updatedDocuments = documents.map(doc => 
+
+    const selectedProjectObj = mockProjects.find((p) => p.id === editProject)
+
+    const updatedDocuments = documents.map((doc) =>
       doc.id === editingDocument.id
         ? {
             ...doc,
@@ -360,65 +366,68 @@ const DocumentsPage = () => {
             description: editDescription,
             projectId: editProject,
             projectName: selectedProjectObj?.name || 'Unknown Project',
-            tags: editTags.split(',').map(tag => tag.trim()).filter(tag => tag),
+            tags: editTags
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag),
           }
         : doc
-    );
-    
-    setDocuments(updatedDocuments);
-    setIsEditDialogOpen(false);
-    toast.success(`Updated ${editName}`);
-  };
-  
+    )
+
+    setDocuments(updatedDocuments)
+    setIsEditDialogOpen(false)
+    toast.success(`Updated ${editName}`)
+  }
+
   const openEditDialog = (document: Document) => {
-    setEditingDocument(document);
-    setEditName(document.name);
-    setEditDescription(document.description || '');
-    setEditProject(document.projectId);
-    setEditTags((document.tags || []).join(', '));
-    setIsEditDialogOpen(true);
-    
+    setEditingDocument(document)
+    setEditName(document.name)
+    setEditDescription(document.description || '')
+    setEditProject(document.projectId)
+    setEditTags((document.tags || []).join(', '))
+    setIsEditDialogOpen(true)
+
     if (documentDialogOpen) {
-      setDocumentDialogOpen(false);
+      setDocumentDialogOpen(false)
     }
-  };
-  
+  }
+
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-  
+    if (bytes === 0) return '0 Bytes'
+
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
   // Filter documents based on tab and search
-  const filteredDocuments = documents.filter(doc => {
+  const filteredDocuments = documents.filter((doc) => {
     // Project filter
     if (activeProject !== 'all' && doc.projectId !== activeProject) {
-      return false;
+      return false
     }
-    
+
     // Tab filter
-    if (activeTab === 'starred' && !doc.isStarred) return false;
-    if (activeTab === 'archived' && !doc.isArchived) return false;
-    if (activeTab === 'all' && doc.isArchived) return false;
-    
+    if (activeTab === 'starred' && !doc.isStarred) return false
+    if (activeTab === 'archived' && !doc.isArchived) return false
+    if (activeTab === 'all' && doc.isArchived) return false
+
     // Search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase()
       return (
         doc.name.toLowerCase().includes(query) ||
         doc.projectName?.toLowerCase().includes(query) ||
         doc.description?.toLowerCase().includes(query) ||
-        doc.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        doc.tags?.some((tag) => tag.toLowerCase().includes(query)) ||
         doc.fileType.toLowerCase().includes(query)
-      );
+      )
     }
-    
-    return true;
-  });
+
+    return true
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -427,9 +436,11 @@ const DocumentsPage = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div>
             <h1 className="font-bold">Documents</h1>
-            <p className="text-muted-foreground">Browse and manage your documents</p>
+            <p className="text-muted-foreground">
+              Browse and manage your documents
+            </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -440,14 +451,14 @@ const DocumentsPage = () => {
                 className="pl-9 w-full sm:w-64"
               />
             </div>
-            
+
             <Button onClick={() => setIsUploadDialogOpen(true)}>
               <PlusIcon className="h-4 w-4 mr-2" />
               Upload
             </Button>
           </div>
         </div>
-        
+
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -456,7 +467,7 @@ const DocumentsPage = () => {
                 <TabsTrigger value="starred">Starred</TabsTrigger>
                 <TabsTrigger value="archived">Archived</TabsTrigger>
               </TabsList>
-              
+
               <div className="flex items-center gap-2">
                 <FilterIcon className="h-4 w-4 text-muted-foreground" />
                 <Select value={activeProject} onValueChange={setActiveProject}>
@@ -474,11 +485,14 @@ const DocumentsPage = () => {
                 </Select>
               </div>
             </div>
-            
+
             <TabsContent value="all" className="mt-6">
-              {renderDocumentsList(filteredDocuments, "You don't have any documents yet")}
+              {renderDocumentsList(
+                filteredDocuments,
+                "You don't have any documents yet"
+              )}
             </TabsContent>
-            
+
             <TabsContent value="starred" className="mt-6">
               {renderDocumentsList(
                 filteredDocuments,
@@ -486,7 +500,7 @@ const DocumentsPage = () => {
                 <StarIcon className="h-12 w-12 mx-auto text-muted-foreground/50" />
               )}
             </TabsContent>
-            
+
             <TabsContent value="archived" className="mt-6">
               {renderDocumentsList(
                 filteredDocuments,
@@ -496,7 +510,7 @@ const DocumentsPage = () => {
             </TabsContent>
           </Tabs>
         </div>
-        
+
         {/* Document Viewer */}
         <DocumentViewer
           document={viewedDocument}
@@ -506,14 +520,14 @@ const DocumentsPage = () => {
           onArchive={handleArchiveDocument}
           onDelete={handleDeleteDocument}
         />
-        
+
         {/* Upload Document Dialog */}
         <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Upload Document</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="file">Select File</Label>
@@ -522,11 +536,12 @@ const DocumentsPage = () => {
                     {selectedFile ? (
                       <div className="flex flex-col items-center">
                         <Badge variant="outline" className="mb-2">
-                          {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                          {selectedFile.name} (
+                          {formatFileSize(selectedFile.size)})
                         </Badge>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => setSelectedFile(null)}
                           >
@@ -536,7 +551,9 @@ const DocumentsPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => document.getElementById('file-upload')?.click()}
+                            onClick={() =>
+                              document.getElementById('file-upload')?.click()
+                            }
                           >
                             <CheckIcon className="h-3 w-3 mr-1" />
                             Change
@@ -551,7 +568,9 @@ const DocumentsPage = () => {
                         </p>
                         <Button
                           variant="outline"
-                          onClick={() => document.getElementById('file-upload')?.click()}
+                          onClick={() =>
+                            document.getElementById('file-upload')?.click()
+                          }
                         >
                           Browse Files
                         </Button>
@@ -566,7 +585,7 @@ const DocumentsPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="file-name">Document Name</Label>
                 <Input
@@ -576,7 +595,7 @@ const DocumentsPage = () => {
                   onChange={(e) => setUploadFileName(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description (optional)</Label>
                 <Textarea
@@ -587,7 +606,7 @@ const DocumentsPage = () => {
                   rows={3}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="project">Project</Label>
                 <Select value={uploadProject} onValueChange={setUploadProject}>
@@ -603,7 +622,7 @@ const DocumentsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
                 <Input
@@ -614,23 +633,26 @@ const DocumentsPage = () => {
                 />
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsUploadDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleUploadDocument}>Upload</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        
+
         {/* Edit Document Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Edit Document</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Document Name</Label>
@@ -641,7 +663,7 @@ const DocumentsPage = () => {
                   onChange={(e) => setEditName(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="edit-description">Description (optional)</Label>
                 <Textarea
@@ -652,7 +674,7 @@ const DocumentsPage = () => {
                   rows={3}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="edit-project">Project</Label>
                 <Select value={editProject} onValueChange={setEditProject}>
@@ -668,7 +690,7 @@ const DocumentsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="edit-tags">Tags (comma separated)</Label>
                 <Input
@@ -679,9 +701,12 @@ const DocumentsPage = () => {
                 />
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleEditDocument}>Save Changes</Button>
@@ -691,13 +716,19 @@ const DocumentsPage = () => {
       </main>
       <FloatingChat />
     </div>
-  );
-  
-  function renderDocumentsList(docs: Document[], emptyMessage: string, emptyIcon?: React.ReactNode) {
+  )
+
+  function renderDocumentsList(
+    docs: Document[],
+    emptyMessage: string,
+    emptyIcon?: React.ReactNode
+  ) {
     if (docs.length === 0) {
       return (
         <div className="py-12 text-center">
-          {emptyIcon || <FileIcon className="h-12 w-12 mx-auto text-muted-foreground/50" />}
+          {emptyIcon || (
+            <FileIcon className="h-12 w-12 mx-auto text-muted-foreground/50" />
+          )}
           <h3 className="mt-4 text-lg font-medium">No documents found</h3>
           <p className="text-muted-foreground mb-4">
             {searchQuery ? `No documents match "${searchQuery}"` : emptyMessage}
@@ -709,9 +740,9 @@ const DocumentsPage = () => {
             </Button>
           )}
         </div>
-      );
+      )
     }
-    
+
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {docs.map((doc) => (
@@ -726,8 +757,6 @@ const DocumentsPage = () => {
           />
         ))}
       </div>
-    );
+    )
   }
-};
-
-export default DocumentsPage;
+}

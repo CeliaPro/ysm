@@ -1,60 +1,69 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { 
-  SearchIcon, 
-  FolderIcon, 
-  PlusIcon, 
-  FileIcon, 
-  UsersIcon, 
+'use client'
+import React, { useState } from 'react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import {
+  SearchIcon,
+  FolderIcon,
+  PlusIcon,
+  FileIcon,
+  UsersIcon,
   MoreHorizontalIcon,
   EditIcon,
   TrashIcon,
-  ArchiveIcon
-} from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+  ArchiveIcon,
+} from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { formatDistanceToNow } from 'date-fns'
+import { useAuth } from '@/contexts/AuthContext'
+import { toast } from 'sonner'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Progress } from '@/components/ui/progress'
 
 interface Project {
-  id: string;
-  name: string;
-  description: string;
-  documentsCount: number;
-  membersCount: number;
-  storageUsed: string;
-  storageLimit: string;
-  usagePercentage: number;
-  createdAt: Date;
-  lastUpdated: Date;
-  isArchived?: boolean;
+  id: string
+  name: string
+  description: string
+  documentsCount: number
+  membersCount: number
+  storageUsed: string
+  storageLimit: string
+  usagePercentage: number
+  createdAt: Date
+  lastUpdated: Date
+  isArchived?: boolean
 }
 
 const mockProjects: Project[] = [
   {
     id: '1',
     name: 'Finance Portal',
-    description: 'Financial documents, reports, and analysis for the finance department.',
+    description:
+      'Financial documents, reports, and analysis for the finance department.',
     documentsCount: 24,
     membersCount: 8,
     storageUsed: '120 MB',
@@ -66,7 +75,8 @@ const mockProjects: Project[] = [
   {
     id: '2',
     name: 'Product Development',
-    description: 'Roadmaps, specifications, and research for product development.',
+    description:
+      'Roadmaps, specifications, and research for product development.',
     documentsCount: 18,
     membersCount: 12,
     storageUsed: '85 MB',
@@ -78,7 +88,8 @@ const mockProjects: Project[] = [
   {
     id: '3',
     name: 'Marketing',
-    description: 'Campaign analysis, marketing materials, and performance reports.',
+    description:
+      'Campaign analysis, marketing materials, and performance reports.',
     documentsCount: 32,
     membersCount: 6,
     storageUsed: '167 MB',
@@ -100,38 +111,39 @@ const mockProjects: Project[] = [
     lastUpdated: new Date(2023, 10, 25),
     isArchived: true,
   },
-];
+]
 
 const ProjectsList: React.FC = () => {
-  const { isAdmin, isProjectManager } = useAuth();
-  const canManageProjects = isAdmin() || isProjectManager();
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
-  const [showArchived, setShowArchived] = useState(false);
-  
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
-  
-  const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [editProjectName, setEditProjectName] = useState('');
-  const [editProjectDescription, setEditProjectDescription] = useState('');
-  
+  const { isAdmin, isProjectManager } = useAuth()
+  const canManageProjects = isAdmin() || isProjectManager()
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [projects, setProjects] = useState<Project[]>(mockProjects)
+  const [showArchived, setShowArchived] = useState(false)
+
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+
+  const [isEditProjectDialogOpen, setIsEditProjectDialogOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [editProjectName, setEditProjectName] = useState('')
+  const [editProjectDescription, setEditProjectDescription] = useState('')
+
   const filteredProjects = projects
-    .filter(project => showArchived || !project.isArchived)
-    .filter(project => 
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  
+    .filter((project) => showArchived || !project.isArchived)
+    .filter(
+      (project) =>
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
   const handleCreateProject = () => {
     if (!newProjectName.trim()) {
-      toast.error('Project name is required');
-      return;
+      toast.error('Project name is required')
+      return
     }
-    
+
     const newProject: Project = {
       id: `project-${Date.now()}`,
       name: newProjectName,
@@ -143,25 +155,25 @@ const ProjectsList: React.FC = () => {
       usagePercentage: 0,
       createdAt: new Date(),
       lastUpdated: new Date(),
-    };
-    
-    setProjects([newProject, ...projects]);
-    setNewProjectName('');
-    setNewProjectDescription('');
-    setIsNewProjectDialogOpen(false);
-    
-    toast.success(`Project "${newProjectName}" created successfully`);
-  };
-  
-  const handleEditProject = () => {
-    if (!editingProject) return;
-    
-    if (!editProjectName.trim()) {
-      toast.error('Project name is required');
-      return;
     }
-    
-    const updatedProjects = projects.map(project => 
+
+    setProjects([newProject, ...projects])
+    setNewProjectName('')
+    setNewProjectDescription('')
+    setIsNewProjectDialogOpen(false)
+
+    toast.success(`Project "${newProjectName}" created successfully`)
+  }
+
+  const handleEditProject = () => {
+    if (!editingProject) return
+
+    if (!editProjectName.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+
+    const updatedProjects = projects.map((project) =>
       project.id === editingProject.id
         ? {
             ...project,
@@ -170,37 +182,37 @@ const ProjectsList: React.FC = () => {
             lastUpdated: new Date(),
           }
         : project
-    );
-    
-    setProjects(updatedProjects);
-    setIsEditProjectDialogOpen(false);
-    toast.success(`Project updated successfully`);
-  };
-  
+    )
+
+    setProjects(updatedProjects)
+    setIsEditProjectDialogOpen(false)
+    toast.success(`Project updated successfully`)
+  }
+
   const handleArchiveProject = (project: Project) => {
-    const updatedProjects = projects.map(p => 
-      p.id === project.id
-        ? { ...p, isArchived: !p.isArchived }
-        : p
-    );
-    
-    setProjects(updatedProjects);
-    toast.success(`Project "${project.name}" ${project.isArchived ? 'unarchived' : 'archived'} successfully`);
-  };
-  
+    const updatedProjects = projects.map((p) =>
+      p.id === project.id ? { ...p, isArchived: !p.isArchived } : p
+    )
+
+    setProjects(updatedProjects)
+    toast.success(
+      `Project "${project.name}" ${project.isArchived ? 'unarchived' : 'archived'} successfully`
+    )
+  }
+
   const handleDeleteProject = (project: Project) => {
-    const updatedProjects = projects.filter(p => p.id !== project.id);
-    setProjects(updatedProjects);
-    toast.success(`Project "${project.name}" deleted successfully`);
-  };
-  
+    const updatedProjects = projects.filter((p) => p.id !== project.id)
+    setProjects(updatedProjects)
+    toast.success(`Project "${project.name}" deleted successfully`)
+  }
+
   const openEditProjectDialog = (project: Project) => {
-    setEditingProject(project);
-    setEditProjectName(project.name);
-    setEditProjectDescription(project.description);
-    setIsEditProjectDialogOpen(true);
-  };
-  
+    setEditingProject(project)
+    setEditProjectName(project.name)
+    setEditProjectDescription(project.description)
+    setIsEditProjectDialogOpen(true)
+  }
+
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
@@ -208,7 +220,7 @@ const ProjectsList: React.FC = () => {
           <h1 className="font-bold">Projects</h1>
           <p className="text-muted-foreground">Manage your document projects</p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -219,7 +231,7 @@ const ProjectsList: React.FC = () => {
               className="pl-9 w-full sm:w-64"
             />
           </div>
-          
+
           {canManageProjects && (
             <Button onClick={() => setIsNewProjectDialogOpen(true)}>
               <PlusIcon className="h-4 w-4 mr-2" />
@@ -228,11 +240,12 @@ const ProjectsList: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center mb-4">
         <div>
           <Badge variant="outline">
-            {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}
+            {filteredProjects.length}{' '}
+            {filteredProjects.length === 1 ? 'project' : 'projects'}
           </Badge>
         </div>
         <Button
@@ -243,7 +256,7 @@ const ProjectsList: React.FC = () => {
           {showArchived ? 'Hide Archived' : 'Show Archived'}
         </Button>
       </div>
-      
+
       {filteredProjects.length === 0 ? (
         <Card className="w-full py-12">
           <CardContent className="text-center">
@@ -253,8 +266,8 @@ const ProjectsList: React.FC = () => {
               {searchQuery
                 ? `No projects match "${searchQuery}"`
                 : showArchived
-                ? 'No archived projects found'
-                : 'Get started by creating your first project'}
+                  ? 'No archived projects found'
+                  : 'Get started by creating your first project'}
             </p>
             {canManageProjects && !searchQuery && (
               <Button onClick={() => setIsNewProjectDialogOpen(true)}>
@@ -267,8 +280,8 @@ const ProjectsList: React.FC = () => {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => (
-            <Card 
-              key={project.id} 
+            <Card
+              key={project.id}
               className={`transition-all duration-300 hover:shadow-md ${project.isArchived ? 'opacity-70' : 'opacity-100'}`}
             >
               <CardHeader className="pb-3">
@@ -277,7 +290,10 @@ const ProjectsList: React.FC = () => {
                     <CardTitle className="flex items-center">
                       {project.name}
                       {project.isArchived && (
-                        <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-200">
+                        <Badge
+                          variant="outline"
+                          className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-200"
+                        >
                           Archived
                         </Badge>
                       )}
@@ -286,7 +302,7 @@ const ProjectsList: React.FC = () => {
                       {project.description}
                     </CardDescription>
                   </div>
-                  
+
                   {canManageProjects && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -295,16 +311,20 @@ const ProjectsList: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditProjectDialog(project)}>
+                        <DropdownMenuItem
+                          onClick={() => openEditProjectDialog(project)}
+                        >
                           <EditIcon className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleArchiveProject(project)}>
+                        <DropdownMenuItem
+                          onClick={() => handleArchiveProject(project)}
+                        >
                           <ArchiveIcon className="h-4 w-4 mr-2" />
                           {project.isArchived ? 'Unarchive' : 'Archive'}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteProject(project)}
                           className="text-destructive focus:text-destructive"
                         >
@@ -316,7 +336,7 @@ const ProjectsList: React.FC = () => {
                   )}
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pb-3">
                 <div className="flex justify-between items-center mb-2 text-sm">
                   <div className="flex items-center">
@@ -328,7 +348,7 @@ const ProjectsList: React.FC = () => {
                     <span>{project.membersCount} members</span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Storage</span>
@@ -339,17 +359,28 @@ const ProjectsList: React.FC = () => {
                   <Progress value={project.usagePercentage} />
                 </div>
               </CardContent>
-              
+
               <CardFooter className="pt-3 flex justify-between text-xs text-muted-foreground">
-                <span>Created {formatDistanceToNow(project.createdAt, { addSuffix: true })}</span>
-                <span>Updated {formatDistanceToNow(project.lastUpdated, { addSuffix: true })}</span>
+                <span>
+                  Created{' '}
+                  {formatDistanceToNow(project.createdAt, { addSuffix: true })}
+                </span>
+                <span>
+                  Updated{' '}
+                  {formatDistanceToNow(project.lastUpdated, {
+                    addSuffix: true,
+                  })}
+                </span>
               </CardFooter>
             </Card>
           ))}
         </div>
       )}
-      
-      <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
+
+      <Dialog
+        open={isNewProjectDialogOpen}
+        onOpenChange={setIsNewProjectDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
@@ -357,7 +388,7 @@ const ProjectsList: React.FC = () => {
               Add a new project to organize your documents.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
@@ -368,7 +399,7 @@ const ProjectsList: React.FC = () => {
                 onChange={(e) => setNewProjectName(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="project-description">Description</Label>
               <Textarea
@@ -380,25 +411,29 @@ const ProjectsList: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewProjectDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsNewProjectDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateProject}>Create Project</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isEditProjectDialogOpen} onOpenChange={setIsEditProjectDialogOpen}>
+
+      <Dialog
+        open={isEditProjectDialogOpen}
+        onOpenChange={setIsEditProjectDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
-            <DialogDescription>
-              Update your project details.
-            </DialogDescription>
+            <DialogDescription>Update your project details.</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-project-name">Project Name</Label>
@@ -409,7 +444,7 @@ const ProjectsList: React.FC = () => {
                 onChange={(e) => setEditProjectName(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="edit-project-description">Description</Label>
               <Textarea
@@ -421,9 +456,12 @@ const ProjectsList: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditProjectDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditProjectDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleEditProject}>Save Changes</Button>
@@ -431,7 +469,7 @@ const ProjectsList: React.FC = () => {
         </DialogContent>
       </Dialog>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectsList;
+export default ProjectsList
