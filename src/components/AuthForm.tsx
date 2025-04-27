@@ -1,52 +1,71 @@
-
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText as DocumentIcon, MessageSquare as MessageSquareIcon, Lock as LockIcon, User as UserIcon, Mail as MailIcon } from 'lucide-react';
-import { toast } from 'sonner';
+'use client'
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  FileText as DocumentIcon,
+  MessageSquare as MessageSquareIcon,
+  Lock as LockIcon,
+  User as UserIcon,
+  Mail as MailIcon,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const AuthForm: React.FC = () => {
-  const { login, register, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>('login');
-  
+  const [activeTab, setActiveTab] = useState<string>('login')
+
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+
   // Register form state
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [registerName, setRegisterName] = useState('')
+  const [registerEmail, setRegisterEmail] = useState('')
+  const [registerPassword, setRegisterPassword] = useState('')
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
+    setIsLoading(true)
     try {
-      await login(loginEmail, loginPassword);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      })
+
+      if (response.ok) {
+        router.push('/dashboard')
+      } else {
+        toast.error('Les mots de passe ne correspondent pas')
+      }
     } catch (error) {
-      // Error is handled in the auth context
-      console.error('Échec de connexion:', error);
+      console.error('Échec de connexion:', error)
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     if (registerPassword !== registerConfirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
+      toast.error('Les mots de passe ne correspondent pas')
+      return
     }
 
     try {
-      await register(registerEmail, registerPassword, registerName);
+      // await register(registerEmail, registerPassword, registerName)
     } catch (error) {
       // Error is handled in the auth context
-      console.error('Échec d\'inscription:', error);
+      console.error("Échec d'inscription:", error)
     }
-  };
+  }
 
   return (
     <div className="w-full max-w-md mx-auto glass-card p-8 rounded-xl shadow-subtle animate-scale-in">
@@ -61,18 +80,18 @@ const AuthForm: React.FC = () => {
         </div>
       </div>
       <h2 className="text-2xl font-bold text-center mb-6">DocuMind</h2>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="login">Connexion</TabsTrigger>
           <TabsTrigger value="register">Inscription</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="login">
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <div className="relative">
+              <div className="relative mt-2">
                 <MailIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
@@ -85,7 +104,7 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="password">Mot de passe</Label>
@@ -93,7 +112,7 @@ const AuthForm: React.FC = () => {
                   Mot de passe oublié?
                 </a>
               </div>
-              <div className="relative">
+              <div className="relative mt-2">
                 <LockIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
@@ -106,16 +125,12 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Connexion en cours...' : 'Se connecter'}
             </Button>
-            
-            <div className="text-center text-sm text-muted-foreground mt-4">
+
+            <div className="text-center text-sm text-muted-foreground mt-1">
               <p>Comptes de démonstration:</p>
               <p>admin@example.com / password</p>
               <p>manager@example.com / password</p>
@@ -123,7 +138,7 @@ const AuthForm: React.FC = () => {
             </div>
           </form>
         </TabsContent>
-        
+
         <TabsContent value="register">
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
@@ -140,7 +155,7 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="register-email">Email</Label>
               <div className="relative">
@@ -156,7 +171,7 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="register-password">Mot de passe</Label>
               <div className="relative">
@@ -172,9 +187,11 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+              <Label htmlFor="confirm-password">
+                Confirmer le mot de passe
+              </Label>
               <div className="relative">
                 <LockIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -188,19 +205,15 @@ const AuthForm: React.FC = () => {
                 />
               </div>
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Création du compte...' : 'Créer un compte'}
             </Button>
           </form>
         </TabsContent>
       </Tabs>
     </div>
-  );
-};
+  )
+}
 
-export default AuthForm;
+export default AuthForm

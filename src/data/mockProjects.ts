@@ -1,12 +1,12 @@
-
-import { Project } from '@/types/project';
+import { Project } from '@/types/project'
 
 // Mock data
 export const mockProjects: Project[] = [
   {
     id: '1',
     name: 'Finance Portal',
-    description: 'Financial documents, reports, and analysis for the finance department.',
+    description:
+      'Financial documents, reports, and analysis for the finance department.',
     documentsCount: 24,
     membersCount: 8,
     storageUsed: '120 MB',
@@ -18,7 +18,8 @@ export const mockProjects: Project[] = [
   {
     id: '2',
     name: 'Product Development',
-    description: 'Roadmaps, specifications, and research for product development.',
+    description:
+      'Roadmaps, specifications, and research for product development.',
     documentsCount: 18,
     membersCount: 12,
     storageUsed: '85 MB',
@@ -30,7 +31,8 @@ export const mockProjects: Project[] = [
   {
     id: '3',
     name: 'Marketing',
-    description: 'Campaign analysis, marketing materials, and performance reports.',
+    description:
+      'Campaign analysis, marketing materials, and performance reports.',
     documentsCount: 32,
     membersCount: 6,
     storageUsed: '167 MB',
@@ -52,4 +54,4 @@ export const mockProjects: Project[] = [
     lastUpdated: new Date(2023, 10, 25),
     isArchived: true,
   },
-];
+]

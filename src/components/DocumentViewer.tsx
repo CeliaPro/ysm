@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from 'react'
 import {
   Dialog,
   DialogContent,
@@ -7,12 +6,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { IconButton } from '@/components/ui/icon-button';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { IconButton } from '@/components/ui/icon-button'
 import {
   FileIcon,
-  StarIcon,
   ArchiveIcon,
   TrashIcon,
   EditIcon,
@@ -21,18 +19,18 @@ import {
   GlobeIcon,
   LockIcon,
   ServerIcon,
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { Document } from '@/types/project';
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { format } from 'date-fns'
+import { Document } from '@/types/project'
 
 interface DocumentViewerProps {
-  document: Document | null;
-  open: boolean;
-  onClose: () => void;
-  onEdit: (document: Document) => void;
-  onArchive: (document: Document) => void;
-  onDelete: (document: Document) => void;
+  document: Document | null
+  open: boolean
+  onClose: () => void
+  onEdit: (document: Document) => void
+  onArchive: (document: Document) => void
+  onDelete: (document: Document) => void
 }
 
 const DocumentViewer: React.FC<DocumentViewerProps> = ({
@@ -44,34 +42,36 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
   onDelete,
 }) => {
   if (!document) {
-    return null;
+    return null
   }
 
   // Translation map for access levels
   const accessLevelTranslations = {
-    'public': 'Public',
-    'private': 'Privé',
-    'project': 'Projet'
-  };
+    public: 'Public',
+    private: 'Privé',
+    project: 'Projet',
+  }
 
   const getStorageIcon = () => {
-    return document.storageProvider === 's3' ? 
-      <ServerIcon className="h-4 w-4 text-blue-500 mr-1" /> : 
-      <FileIcon className="h-4 w-4 text-gray-500 mr-1" />;
-  };
+    return document.storageProvider === 's3' ? (
+      <ServerIcon className="h-4 w-4 text-blue-500 mr-1" />
+    ) : (
+      <FileIcon className="h-4 w-4 text-gray-500 mr-1" />
+    )
+  }
 
   const getAccessLevelIcon = () => {
     switch (document.accessLevel) {
       case 'public':
-        return <GlobeIcon className="h-4 w-4 mr-1 text-green-500" />;
+        return <GlobeIcon className="h-4 w-4 mr-1 text-green-500" />
       case 'private':
-        return <LockIcon className="h-4 w-4 mr-1 text-red-500" />;
+        return <LockIcon className="h-4 w-4 mr-1 text-red-500" />
       case 'project':
-        return <LockIcon className="h-4 w-4 mr-1 text-yellow-500" />;
+        return <LockIcon className="h-4 w-4 mr-1 text-yellow-500" />
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -90,7 +90,8 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <div>
               <p className="text-sm font-medium">{document.name}</p>
               <p className="text-xs text-muted-foreground">
-                {document.fileType.toUpperCase()} - {document.fileSizeFormatted || document.fileSize.toString()}
+                {document.fileType.toUpperCase()} -{' '}
+                {document.fileSizeFormatted || document.fileSize.toString()}
               </p>
             </div>
           </div>
@@ -99,25 +100,32 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <div className="flex items-center gap-4">
               <div className="flex items-center">
                 {getStorageIcon()}
-                <span className="text-sm capitalize">{document.storageProvider}</span>
+                <span className="text-sm capitalize">
+                  {document.storageProvider}
+                </span>
                 {document.storageProvider === 's3' && document.s3Region && (
                   <Badge variant="outline" className="ml-2">
                     {document.s3Region}
                   </Badge>
                 )}
               </div>
-              
+
               <div className="flex items-center">
                 {getAccessLevelIcon()}
                 <span className="text-sm">
-                  {accessLevelTranslations[document.accessLevel as keyof typeof accessLevelTranslations] || document.accessLevel}
+                  {accessLevelTranslations[
+                    document.accessLevel as keyof typeof accessLevelTranslations
+                  ] || document.accessLevel}
                 </span>
               </div>
             </div>
-            
+
             <div>
               {document.isArchived && (
-                <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                <Badge
+                  variant="outline"
+                  className="bg-yellow-100 text-yellow-800 border-yellow-200"
+                >
                   Archivé
                 </Badge>
               )}
@@ -127,7 +135,9 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {document.description && (
             <div className="space-y-2">
               <p className="text-sm font-medium">Description</p>
-              <p className="text-sm text-muted-foreground">{document.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {document.description}
+              </p>
             </div>
           )}
 
@@ -143,7 +153,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
               </div>
             </div>
           )}
-          
+
           {document.storageProvider === 's3' && (
             <div className="space-y-2">
               <p className="text-sm font-medium">Détails du Stockage Cloud</p>
@@ -153,7 +163,9 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
                   <span className="ml-1">{document.s3BucketName}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Clé d'objet:</span>
+                  <span className="text-muted-foreground">
+                    Clé d&#39;objet:
+                  </span>
                   <span className="ml-1 truncate">{document.s3ObjectKey}</span>
                 </div>
               </div>
@@ -172,7 +184,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <IconButton
               onClick={() => {
                 // Implement download functionality here
-                console.log('Télécharger le document', document.name);
+                console.log('Télécharger le document', document.name)
               }}
             >
               <DownloadIcon className="h-4 w-4" />
@@ -183,7 +195,10 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <IconButton onClick={() => onArchive(document)}>
               <ArchiveIcon className="h-4 w-4" />
             </IconButton>
-            <IconButton onClick={() => onDelete(document)} className="text-destructive">
+            <IconButton
+              onClick={() => onDelete(document)}
+              className="text-destructive"
+            >
               <TrashIcon className="h-4 w-4" />
             </IconButton>
             <div className="sm:hidden">
@@ -195,7 +210,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default DocumentViewer;
+export default DocumentViewer
