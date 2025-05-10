@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique @db.VarChar(255)
+  name              String              @db.VarChar(255)
+  password          String
+  role              user_role
+  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(6)
+  activityLogs      ActivityLog[]
+  ai_configurations ai_configurations[]
+  aiConversations   AIConversation[]
+  aiPrompts         AIPrompt[]
+  documents         Document[]          @relation("UploadedBy")
+  projectMembers    ProjectMember[]
+  storageAccessLogs StorageAccessLog[]
+
+  @@map("users")
+}
+
+model Project {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(255)
+  description     String?
+  storageLimit    BigInt?          @default(0) @map("storage_limit")
+  isArchived      Boolean?         @default(false) @map("is_archived")
+  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  activityLogs    ActivityLog[]
+  aiConversations AIConversation[]
+  documents       Document[]
+  members         ProjectMember[]
+  storagePolicies StoragePolicy[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        Int          @id @default(autoincrement())
+  projectId Int?         @map("project_id")
+  userId    Int?         @map("user_id")
+  role      project_role
+  joinedAt  DateTime?    @default(now()) @map("joined_at") @db.Timestamp(6)
+  project   Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user      User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("project_members")
+}
+
+model Document {
+  id                Int                @id @default(autoincrement())
+  projectId         Int?               @map("project_id")
+  name              String             @db.VarChar(255)
+  description       String?
+  filePath          String             @map("file_path")
+  fileSize          BigInt             @map("file_size")
+  fileType          String?            @map("file_type") @db.VarChar(50)
+  uploadedById      Int?               @map("uploaded_by")
+  uploadedAt        DateTime?          @default(now()) @map("uploaded_at") @db.Timestamp(6)
+  updatedAt         DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  isArchived        Boolean?           @default(false) @map("is_archived")
+  storageProvider   storage_provider   @map("storage_provider")
+  s3BucketName      String?            @map("s3_bucket_name") @db.VarChar(255)
+  s3ObjectKey       String?            @map("s3_object_key") @db.VarChar(255)
+  s3Region          String?            @map("s3_region") @db.VarChar(100)
+  contentType       String?            @map("content_type") @db.VarChar(100)
+  publicUrl         String?            @map("public_url")
+  accessLevel       access_level       @map("access_level")
+  activityLogs      ActivityLog[]
+  aiConversations   AIConversation[]
+  tags              DocumentTag[]
+  project           Project?           @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  uploadedBy        User?              @relation("UploadedBy", fields: [uploadedById], references: [id], onUpdate: NoAction)
+  storageAccessLogs StorageAccessLog[]
+
+  @@map("documents")
+}
+
+model DocumentTag {
+  id         Int       @id @default(autoincrement())
+  documentId Int?      @map("document_id")
+  tagName    String    @map("tag_name") @db.VarChar(255)
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("document_tags")
+}
+
+model S3Bucket {
+  id          Int       @id @default(autoincrement())
+  bucketName  String    @unique @map("bucket_name") @db.VarChar(255)
+  region      String    @db.VarChar(100)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  isActive    Boolean?  @default(true) @map("is_active")
+  description String?
+
+  @@map("s3_buckets")
+}
+
+model StoragePolicy {
+  id               Int       @id @default(autoincrement())
+  projectId        Int?      @map("project_id")
+  maxFileSize      BigInt?   @default(104857600) @map("max_file_size")
+  allowedFileTypes String[]  @map("allowed_file_types")
+  retentionPeriod  Int?      @default(30) @map("retention_period")
+  createdAt        DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  project          Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("storage_policies")
+}
+
+model StorageAccessLog {
+  id              Int         @id @default(autoincrement())
+  documentId      Int?        @map("document_id")
+  userId          Int?        @map("user_id")
+  accessType      access_type @map("access_type")
+  accessTimestamp DateTime?   @default(now()) @map("access_timestamp") @db.Timestamp(6)
+  ipAddress       String      @map("ip_address") @db.Inet
+  success         Boolean?    @default(true)
+  document        Document?   @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user            User?       @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@map("storage_access_logs")
+}
+
+model ActivityLog {
+  id            Int         @id @default(autoincrement())
+  userId        Int?        @map("user_id")
+  projectId     Int?        @map("project_id")
+  documentId    Int?        @map("document_id")
+  actionType    action_type @map("action_type")
+  actionDetails String?     @map("action_details")
+  createdAt     DateTime?   @default(now()) @map("created_at") @db.Timestamp(6)
+  document      Document?   @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  project       Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user          User?       @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@map("activity_logs")
+}
+
+model AIPrompt {
+  id                Int                @id @default(autoincrement())
+  configuration_id  Int?
+  promptText        String             @map("prompt_text")
+  purpose           String             @db.VarChar(255)
+  createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdBy         Int?               @map("created_by")
+  ai_configurations ai_configurations? @relation(fields: [configuration_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user              User?              @relation(fields: [createdBy], references: [id], onUpdate: NoAction)
+
+  @@map("ai_prompts")
+}
+
+model AIConversation {
+  id         Int         @id @default(autoincrement())
+  userId     Int?        @map("user_id")
+  projectId  Int?        @map("project_id")
+  documentId Int?        @map("document_id")
+  title      String      @db.VarChar(255)
+  createdAt  DateTime?   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime?   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  document   Document?   @relation(fields: [documentId], references: [id], onUpdate: NoAction)
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user       User?       @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  messages   AIMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AIMessage {
+  id             Int             @id @default(autoincrement())
+  conversationId Int?            @map("conversation_id")
+  role           ai_role
+  content        String
+  timestamp      DateTime?       @default(now()) @db.Timestamp(6)
+  tokensUsed     Int?            @default(0) @map("tokens_used")
+  conversation   AIConversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("ai_messages")
+}
+
+model ai_configurations {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  model       String     @db.VarChar(50)
+  max_tokens  Int?       @default(1000)
+  temperature Float?     @default(0.7)
+  created_at  DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?  @default(now()) @db.Timestamp(6)
+  created_by  Int?
+  is_active   Boolean?   @default(true)
+  users       User?      @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  ai_prompts  AIPrompt[]
+}
+
+enum access_level {
+  public
+  private
+  project
+}
+
+enum access_type {
+  view
+  download
+  upload
+  delete
+}
+
+enum action_type {
+  CREATE
+  UPDATE
+  DELETE
+  ARCHIVE
+}
+
+enum ai_purpose {
+  document_summary
+  content_generation
+}
+
+enum ai_role {
+  user
+  assistant
+}
+
+enum project_role {
+  owner
+  editor
+  viewer
+}
+
+enum storage_provider {
+  local
+  s3
+}
+
+enum user_role {
+  admin
+  project_manager
+  employee
+}
