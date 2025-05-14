@@ -1,4 +1,4 @@
-// GET /api/users/me
+// GET /api/users/me to get the current user
 import { NextRequest, NextResponse } from 'next/server';
 import {prisma} from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/getUserFromRequest';

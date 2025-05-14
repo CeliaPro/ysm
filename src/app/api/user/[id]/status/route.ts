@@ -1,4 +1,4 @@
-// PATCH /api/users/[id]/status
+// PATCH /api/users/[id]/status to update the status of a user
 import { NextRequest, NextResponse } from 'next/server';
 import {prisma} from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/getUserFromRequest';

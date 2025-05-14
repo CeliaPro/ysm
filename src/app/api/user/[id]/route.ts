@@ -1,4 +1,4 @@
-// /api/users/[id]
+// /api/users/[id] to get, update, delete a user by id
 import { NextRequest, NextResponse } from 'next/server';
 import {prisma} from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/getUserFromRequest';
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   try {
     const { userId: userId, role } = await getUserFromRequest(req);
 
-    if (parseInt(params.id) !== userId && role !== 'ADMIN') {
+    if (parseInt(params.id, 10) !== Number(userId) && role !== 'ADMIN') {
       return new NextResponse('Forbidden', { status: 403 });
     }
 
@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const { userId: userId, role } = await getUserFromRequest(req);
 
-    if (parseInt(params.id) !== userId && role !== 'ADMIN') {
+    if (parseInt(params.id) !== Number(userId) && role !== 'ADMIN') {
       return new NextResponse('Forbidden', { status: 403 });
     }
 

@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import ResetPasswordForm from '@/components/ResetPasswordForm'
+import Link from 'next/link'
 
 const AuthForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('login')
@@ -40,8 +42,10 @@ const AuthForm: React.FC = () => {
       })
 
       if (response.ok) {
-        router.push('/dashboard')
+        toast.success('Connexion réussie'); //added
+        router.push('/dashboard') 
       } else {
+        const { message } = await response.json(); //added
         toast.error('Les mots de passe ne correspondent pas')
       }
     } catch (error) {
@@ -52,20 +56,40 @@ const AuthForm: React.FC = () => {
   }
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+    e.preventDefault();
+  
     if (registerPassword !== registerConfirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas')
-      return
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
     }
-
+  
+    setIsLoading(true);
     try {
-      // await register(registerEmail, registerPassword, registerName)
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: registerName,
+          email: registerEmail,
+          password: registerPassword,
+        }),
+      });
+  
+      if (response.ok) {
+        toast.success('Inscription réussie ! Vérifiez votre email.');
+        setActiveTab('login'); // switch to login tab
+      } else {
+        const { message } = await response.json();
+        toast.error(message || "Échec d'inscription");
+      }
     } catch (error) {
-      // Error is handled in the auth context
-      console.error("Échec d'inscription:", error)
+      toast.error("Erreur réseau");
+      console.error("Inscription échouée :", error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
+  
 
   return (
     <div className="w-full max-w-md mx-auto glass-card p-8 rounded-xl shadow-subtle animate-scale-in">
@@ -108,9 +132,10 @@ const AuthForm: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="password">Mot de passe</Label>
-                <a href="#" className="text-xs text-primary hover:underline">
-                  Mot de passe oublié?
-                </a>
+                <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                 Mot de passe oublié?
+                </Link>
+
               </div>
               <div className="relative mt-2">
                 <LockIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -129,13 +154,6 @@ const AuthForm: React.FC = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Connexion en cours...' : 'Se connecter'}
             </Button>
-
-            {/* <div className="text-center text-sm text-muted-foreground mt-1">
-              <p>Comptes de démonstration:</p>
-              <p>admin@example.com / password</p>
-              <p>manager@example.com / password</p>
-              <p>employee@example.com / password</p>
-            </div> */}
           </form>
         </TabsContent>
 

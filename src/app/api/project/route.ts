@@ -1,33 +1,48 @@
-// src/app/api/projects/route.ts
-
+import { projectService } from '@/services/projectService';
 import { NextRequest, NextResponse } from 'next/server';
-import * as projectService from '@/services/projectService';
-import { getUserFromRequest } from '@/lib/getUserFromRequest';
+import { getUserFromRequest } from '@/lib/getUserFromRequest'; // Ensure this path is correct
 
-// GET all projects for current user (based on membership)
-export async function GET(req: NextRequest) {
+export async function handler(req: NextRequest) {
+  const { method } = req;
+  let user;
+
   try {
-    const { userId } = await getUserFromRequest(req);
-    const projects = await projectService.getUserProjects(userId);
-    return NextResponse.json(projects);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 403 });
-  }
-}
-
-// POST create a new project (ADMIN or MANAGER only)
-export async function POST(req: NextRequest) {
-  try {
-    const { userId, role } = await getUserFromRequest(req);
-
-    if (role !== 'ADMIN' && role !== 'PROJECT_MANAGER') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    // Get the user data from the JWT token in the request
+    user = await getUserFromRequest(req); // Ensure 'req' is of type NextRequest
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ message: 'Unauthorized: ' + error.message }, { status: 401 });
     }
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
 
-    const data = await req.json();
-    const project = await projectService.createProject(data);
-    return NextResponse.json(project);
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Error creating project' }, { status: 500 });
+  switch (method) {
+    case 'GET':
+      // Get all projects for the user
+      try {
+        const projects = await projectService.getAllProjects(user.userId); // Assuming `userId` is used for project queries
+        return NextResponse.json(projects, { status: 200 });
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          return NextResponse.json({ message: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+      }
+
+    case 'POST':
+      // Create a new project
+      try {
+        const data = await req.json(); // Parse JSON body
+        const project = await projectService.createProject(user.userId, data); // Pass userId and project data
+        return NextResponse.json(project, { status: 201 });
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          return NextResponse.json({ message: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+      }
+
+    default:
+      return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
   }
 }
